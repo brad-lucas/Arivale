@@ -3,10 +3,16 @@ Routes and views for the flask application.
 """
 
 from datetime import datetime
+
 from flask import Flask, render_template, redirect, url_for, request, session, flash
+from flask.ext.api import status
+
 from arivale_scheduling import app
-from arivale_scheduling.forms import ContactForm, CoachSignupForm, UserSignupForm, CoachSigninForm, UserSigninForm
+from arivale_scheduling.forms import CoachSignupForm, UserSignupForm, CoachSigninForm, UserSigninForm
 from arivale_scheduling.models import db, Coach, User
+
+def getCurrentYear():
+    return datetime.now().year
 
 @app.route('/')
 @app.route('/home')
@@ -14,7 +20,7 @@ def default_landing():
     """Renders the default landing page."""
     return render_template('default_landing.html',
         title='Home',
-        year=datetime.now().year,
+        year=getCurrentYear(),
         message='What an awesome page for Arivale!')
 
 @app.route('/user')
@@ -22,7 +28,7 @@ def user_landing():
     """Renders the user landing page."""
     return render_template('user_landing.html',
         title='User',
-        year=datetime.now().year,
+        year=getCurrentYear(),
         message='What an awesome page for Arivale users!')
 
 @app.route('/user/signup', methods=['GET', 'POST'])
@@ -36,7 +42,7 @@ def user_signup():
     if form.validate() == False:
       return render_template('user_signup.html',
         title='User Sign Up',
-        year=datetime.now().year, 
+        year=getCurrentYear(), 
         form=form)
 
     else:   
@@ -50,7 +56,7 @@ def user_signup():
   elif request.method == 'GET':
     return render_template('user_signup.html',
         title='User Sign Up',
-        year=datetime.now().year, 
+        year=getCurrentYear(), 
         form=form)
 
 @app.route('/user/signin', methods=['GET', 'POST'])
@@ -64,7 +70,7 @@ def user_signin():
     if form.validate() == False:
       return render_template('user_signin.html', 
         title='User Sign In',
-        year=datetime.now().year, 
+        year=getCurrentYear(), 
         form=form)
 
     else:
@@ -74,7 +80,7 @@ def user_signin():
   elif request.method == 'GET':
     return render_template('user_signin.html', 
         title='User Sign In',
-        year=datetime.now().year, 
+        year=getCurrentYear(), 
         form=form)
 
 @app.route('/user/signout', methods=['GET', 'POST'])
@@ -88,23 +94,23 @@ def user_signout():
 @app.route('/user/profile')
 def user_profile():
   if 'user_email' not in session:
-    return redirect(url_for('user_login'))
+    return redirect(url_for('user_signin'))
  
   user = User.query.filter_by(email = session['user_email']).first()
  
   if user is None:
-    return redirect(url_for('user_login'))
+    return redirect(url_for('user_signin'))
   else:
     return render_template('user_profile.html',
         title='User Profile',
-        year=datetime.now().year)
+        year=getCurrentYear())
 
 @app.route('/coach')
 def coach_landing():
     """Renders the coach landing page."""
     return render_template('coach_landing.html',
         title='Coach',
-        year=datetime.now().year,
+        year=getCurrentYear(),
         message='What an awesome page for Arivale coaches!')
 
 @app.route('/coach/signup', methods=['GET', 'POST'])
@@ -118,7 +124,7 @@ def coach_signup():
     if form.validate() == False:
       return render_template('coach_signup.html',
         title='Coach Sign Up',
-        year=datetime.now().year, 
+        year=getCurrentYear(), 
         form=form)
 
     else:   
@@ -132,7 +138,7 @@ def coach_signup():
   elif request.method == 'GET':
     return render_template('coach_signup.html',
         title='Coach Sign Up',
-        year=datetime.now().year, 
+        year=getCurrentYear(), 
         form=form)
 
 @app.route('/coach/signin', methods=['GET', 'POST'])
@@ -146,7 +152,7 @@ def coach_signin():
     if form.validate() == False:
       return render_template('coach_signin.html', 
         title='Coach Sign In',
-        year=datetime.now().year, 
+        year=getCurrentYear(), 
         form=form)
 
     else:
@@ -156,7 +162,7 @@ def coach_signin():
   elif request.method == 'GET':
     return render_template('coach_signin.html', 
         title='Coach Sign In',
-        year=datetime.now().year, 
+        year=getCurrentYear(), 
         form=form)
 
 @app.route('/coach/signout', methods=['GET', 'POST'])
@@ -170,13 +176,35 @@ def coach_signout():
 @app.route('/coach/profile')
 def coach_profile():
   if 'coach_email' not in session:
-    return redirect(url_for('coach_login'))
+    return redirect(url_for('coach_signin'))
  
   coach = Coach.query.filter_by(email = session['coach_email']).first()
- 
+
   if coach is None:
-    return redirect(url_for('coach_login'))
+    return redirect(url_for('coach_signin'))
+
   else:
+    potential_clients = User.query.filter_by(coachid = None)
+
     return render_template('coach_profile.html',
         title='Coach Profile',
-        year=datetime.now().year)
+        year=getCurrentYear(),
+        existing_clients=coach.clients,
+        potential_clients=potential_clients)
+
+@app.route('/coach/add_client/<int:client_id>', methods=['POST'])
+def coach_add_client(client_id):  
+  user = User.query.filter_by(uid = client_id).first()
+
+  if user.coachid is None:
+    try:
+      coach = Coach.query.filter_by(email = session['coach_email']).first()
+      user.coachid = coach.uid
+      db.session.add(user)
+      db.session.commit()
+      return status.HTTP_200_OK
+    
+    except:
+      return status.HTTP_500_INTERNAL_SERVER_ERROR
+  else:
+    return status.HTTP_409_CONFLICT

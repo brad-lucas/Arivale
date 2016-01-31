@@ -1,7 +1,49 @@
 ﻿{% extends "coach_layout.html" %}
 {% block content %}
 <div class="jumbo">
-    <h2>Profile</h2>
-    <h3>This is {{ session['coach_email'] }}'s profile page</h3>
+    <h2>{{ session['coach_email'] }}'s profile</h2>
 </div>
+{% if existing_clients != None: %}
+<div class="row">
+    <div class="existing-clients">
+    {% for existing_client in existing_clients %}
+        <h3>Existing clients:</h3>
+        <span><b>Name:</b> {{ existing_client.firstname }} {{ existing_client.lastname }}</span>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+{% if potential_clients != None: %}
+<div class="row">
+    {% for potential_client in potential_clients %}
+    <div class="potential-clients">
+        <h3>Potential clients:</h3>
+        <span><b>Name:</b> {{ potential_client.firstname }} {{ potential_client.lastname }}</span><button data-client-id="{{ potential_client.uid }}">Add to clientele</button>
+    </div>
+    {% endfor %}
+</div>
+<script type="text/javascript">
+    $('.potential-clients button').click(function addToClientele() {
+        var $this = $(this),
+            $newSpan = $('span'),
+            somethingHappenedClass = 'something-happened';
+
+        $this.parent().find('span.' + somethingHappenedClass).remove();
+
+        $.post('/coach/add_client/' + $this.data('clientId'))
+            .done(function clientSuccessfullyAdded(data, textStatus, jqXHR ) {
+                $this.replaceWith($newSpan.text('Success!'));
+            })
+            .fail(function clientAddFailed(jqXHR, textStatus, errorThrown) {
+                switch (jqXHR.statusCode) {
+                    case 409:
+                        $this.replaceWith($newSpan.text('Looks like someone beat you to it...'));
+                       
+                    default:
+                        $this.parent().append($newSpan.addClass(somethingHappenedClass).text('Something happened, try again!'));
+                }
+            });
+    });
+</script>
+{% endif %}
 {% endblock %}
