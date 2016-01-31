@@ -8,6 +8,15 @@ from arivale_scheduling import app
 from arivale_scheduling.forms import ContactForm, CoachSignupForm, UserSignupForm, CoachSigninForm, UserSigninForm
 from arivale_scheduling.models import db, Coach, User
 
+@app.route('/')
+@app.route('/home')
+def default_landing():
+    """Renders the default landing page."""
+    return render_template('default_landing.html',
+        title='Home',
+        year=datetime.now().year,
+        message='What an awesome page for Arivale!')
+
 @app.route('/user')
 def user_landing():
     """Renders the user landing page."""
