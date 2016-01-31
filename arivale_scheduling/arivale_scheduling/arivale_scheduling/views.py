@@ -8,11 +8,25 @@ from flask import Flask, render_template, redirect, url_for, request, session, f
 from flask.ext.api import status
 
 from arivale_scheduling import app
-from arivale_scheduling.forms import CoachSignupForm, UserSignupForm, CoachSigninForm, UserSigninForm
-from arivale_scheduling.models import db, Coach, User
+from arivale_scheduling.forms import CoachSignupForm, CustomerSignupForm, CoachSigninForm, CustomerSigninForm
+from arivale_scheduling.models import db, Coach, Customer, CoachAvailabilitySlot
+
+#####################################################################################
+# helper methods
+#####################################################################################
+
+def emptyResponseWithStatusCode(status_code):
+  return render_template('empty.html'), status_code
+
+def getCurrentDatetime():
+  return datetime.now()
 
 def getCurrentYear():
-    return datetime.now().year
+  return getCurrentDatetime().year
+
+#####################################################################################
+# default routes
+#####################################################################################
 
 @app.route('/')
 @app.route('/home')
@@ -23,87 +37,93 @@ def default_landing():
         year=getCurrentYear(),
         message='What an awesome page for Arivale!')
 
-@app.route('/user')
-def user_landing():
-    """Renders the user landing page."""
-    return render_template('user_landing.html',
-        title='User',
-        year=getCurrentYear(),
-        message='What an awesome page for Arivale users!')
+#####################################################################################
+# Customer web routes
+#####################################################################################
 
-@app.route('/user/signup', methods=['GET', 'POST'])
-def user_signup():
-  if 'user_email' in session:
-    return redirect(url_for('user_profile'))
+@app.route('/customer')
+def customer_landing():
+    """Renders the customer landing page."""
+    return render_template('customer_landing.html',
+        title='Customer',
+        year=getCurrentYear(),
+        message='What an awesome page for Arivale customers!')
+
+@app.route('/customer/signup', methods=['GET', 'POST'])
+def customer_signup():
+  if 'customer_email' in session:
+    return redirect(url_for('customer_profile'))
      
-  form = UserSignupForm()
+  form = CustomerSignupForm()
    
   if request.method == 'POST':
     if form.validate() == False:
-      return render_template('user_signup.html',
-        title='User Sign Up',
+      return render_template('customer_signup.html',
+        title='Customer Sign Up',
         year=getCurrentYear(), 
         form=form)
 
-    else:   
-      newuser = User(form.firstname.data, form.lastname.data, form.email.data, form.password.data)
-      db.session.add(newuser)
-      db.session.commit()
+    newcustomer = Customer(form.first_name.data, form.last_name.data, form.email.data, form.password.data)
+    db.session.add(newcustomer)
+    db.session.commit()
 
-      session['user_email'] = newuser.email;
-      return redirect(url_for('user_profile'))
+    session['customer_email'] = newcustomer.email;
+    return redirect(url_for('customer_profile'))
    
   elif request.method == 'GET':
-    return render_template('user_signup.html',
-        title='User Sign Up',
+    return render_template('customer_signup.html',
+        title='Customer Sign Up',
         year=getCurrentYear(), 
         form=form)
 
-@app.route('/user/signin', methods=['GET', 'POST'])
-def user_signin():
-  if 'user_email' in session:
-    return redirect(url_for('user_profile'))
+@app.route('/customer/signin', methods=['GET', 'POST'])
+def customer_signin():
+  if 'customer_email' in session:
+    return redirect(url_for('customer_profile'))
 
-  form = UserSigninForm()
+  form = CustomerSigninForm()
    
   if request.method == 'POST':
     if form.validate() == False:
-      return render_template('user_signin.html', 
-        title='User Sign In',
+      return render_template('customer_signin.html', 
+        title='Customer Sign In',
         year=getCurrentYear(), 
         form=form)
 
-    else:
-      session['user_email'] = form.email.data
-      return redirect(url_for('user_profile'))
+    session['customer_email'] = form.email.data
+    return redirect(url_for('customer_profile'))
                  
   elif request.method == 'GET':
-    return render_template('user_signin.html', 
-        title='User Sign In',
+    return render_template('customer_signin.html', 
+        title='Customer Sign In',
         year=getCurrentYear(), 
         form=form)
 
-@app.route('/user/signout', methods=['GET', 'POST'])
-def user_signout():
-    if 'user_email' not in session:
-        return redirect(url_for('user_signin'))
+@app.route('/customer/signout', methods=['GET', 'POST'])
+def customer_signout():
+    if 'customer_email' not in session:
+        return redirect(url_for('customer_signin'))
 
-    session.pop('user_email', None)
-    return redirect(url_for('user_landing'))
+    session.pop('customer_email', None)
+    return redirect(url_for('customer_landing'))
 
-@app.route('/user/profile')
-def user_profile():
-  if 'user_email' not in session:
-    return redirect(url_for('user_signin'))
+@app.route('/customer/profile')
+def customer_profile():
+  if 'customer_email' not in session:
+    return redirect(url_for('customer_signin'))
  
-  user = User.query.filter_by(email = session['user_email']).first()
+  customer = Customer.query.filter_by(email = session['customer_email']).first()
  
-  if user is None:
-    return redirect(url_for('user_signin'))
-  else:
-    return render_template('user_profile.html',
-        title='User Profile',
-        year=getCurrentYear())
+  if customer is None:
+    return redirect(url_for('customer_signin'))
+  
+  return render_template('customer_profile.html',
+      title='Customer Profile',
+      year=getCurrentYear())
+
+#####################################################################################
+# Coach web routes
+#####################################################################################
 
 @app.route('/coach')
 def coach_landing():
@@ -127,13 +147,12 @@ def coach_signup():
         year=getCurrentYear(), 
         form=form)
 
-    else:   
-      newuser = Coach(form.firstname.data, form.lastname.data, form.email.data, form.password.data)
-      db.session.add(newuser)
-      db.session.commit()
+    newcustomer = Coach(form.first_name.data, form.last_name.data, form.email.data, form.password.data)
+    db.session.add(newcustomer)
+    db.session.commit()
 
-      session['coach_email'] = newuser.email;
-      return redirect(url_for('coach_profile'))
+    session['coach_email'] = newcustomer.email;
+    return redirect(url_for('coach_profile'))
    
   elif request.method == 'GET':
     return render_template('coach_signup.html',
@@ -155,9 +174,8 @@ def coach_signin():
         year=getCurrentYear(), 
         form=form)
 
-    else:
-      session['coach_email'] = form.email.data
-      return redirect(url_for('coach_profile'))
+    session['coach_email'] = form.email.data
+    return redirect(url_for('coach_profile'))
                  
   elif request.method == 'GET':
     return render_template('coach_signin.html', 
@@ -183,28 +201,80 @@ def coach_profile():
   if coach is None:
     return redirect(url_for('coach_signin'))
 
-  else:
-    potential_clients = User.query.filter_by(coachid = None)
+  past_slots_for_ux = []
+  booked_slots_for_ux = []
+  availability_slots_for_ux = []
+  current_datetime = getCurrentDatetime()
 
-    return render_template('coach_profile.html',
-        title='Coach Profile',
-        year=getCurrentYear(),
-        existing_clients=coach.clients,
-        potential_clients=potential_clients)
+  for availability_slot in coach.availability_slots:
+      slot_datetime = availability_slot.window_start_utc
+      
+      slot_value_dictionary = {}
+      slot_value_dictionary['id'] = availability_slot.slot_id
+      slot_value_dictionary['start_timestamp_str'] = slot_datetime.strftime("%Y-%m-%d %H:%M:%S")
+      
+      if slot_datetime > current_datetime:
+        if availability_slot.customer_id is None:
+          availability_slots_for_ux.append(slot_value_dictionary)
+        else:
+          booked_slots_for_ux.append(slot_value_dictionary)
+      else:
+        past_slots_for_ux.append(slot_value_dictionary)
+        
+  return render_template('coach_profile.html',
+      title='Coach Profile',
+      year=getCurrentYear(),
+      past_slots = past_slots_for_ux,
+      booked_slots = booked_slots_for_ux,
+      availability_slots = availability_slots_for_ux,
+      existing_clients = coach.clients,
+      potential_clients = Customer.query.filter_by(coach_id = None).all())
 
-@app.route('/coach/add_client/<int:client_id>', methods=['POST'])
+#####################################################################################
+# Coach API routes
+#####################################################################################
+
+@app.route('/coach/clients/add/<int:client_id>', methods=['POST'])
 def coach_add_client(client_id):  
-  user = User.query.filter_by(uid = client_id).first()
+  customer = Customer.query.filter_by(customer_id = client_id).first()
 
-  if user.coachid is None:
+  status_code = None
+
+  if customer is None:
+    status_code = status.HTTP_404_NOT_FOUND
+
+  elif customer.coach_id is None:
     try:
-      coach = Coach.query.filter_by(email = session['coach_email']).first()
-      user.coachid = coach.uid
-      db.session.add(user)
+      customer.coach_id = Coach.query.filter_by(email = session['coach_email']).first().coach_id
+      db.session.update(customer)
       db.session.commit()
-      return status.HTTP_200_OK
+      status_code = status.HTTP_200_OK
+
+    except:
+      status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
+
+  else:
+    # someone else added the client before this request
+    status_code = status.HTTP_409_CONFLICT
+
+  return emptyResponseWithStatusCode(status_code)
+
+@app.route('/coach/availability/cancel/<int:availability_slot_id>', methods=['POST'])
+def coach_cancel_appointment(availability_slot_id):  
+  availability_slot = CoachAvailabilitySlot.query.filter_by(slot_id = availability_slot_id).first()
+
+  status_code = None
+
+  if availability_slot is None:
+    status_code = status.HTTP_404_NOT_FOUND
+
+  else:
+    try:
+      db.session.delete(availability_slot)
+      db.session.commit()
+      status_code = status.HTTP_200_OK
     
     except:
-      return status.HTTP_500_INTERNAL_SERVER_ERROR
-  else:
-    return status.HTTP_409_CONFLICT
+      status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
+
+  return emptyResponseWithStatusCode(status_code)

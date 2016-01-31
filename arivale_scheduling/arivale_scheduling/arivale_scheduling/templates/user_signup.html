@@ -1,13 +1,13 @@
-﻿{% extends "user_layout.html" %}
+﻿{% extends "customer_layout.html" %}
 
 {% block content %}
 <h2>Sign up</h2>
 
-  {% for message in form.firstname.errors %}
+  {% for message in form.first_name.errors %}
 <div class="flash">{{ message }}</div>
   {% endfor %}
 
-  {% for message in form.lastname.errors %}
+  {% for message in form.last_name.errors %}
 <div class="flash">{{ message }}</div>
   {% endfor %}
 
@@ -19,15 +19,15 @@
 <div class="flash">{{ message }}</div>
   {% endfor %}
 
-<form action="{{ url_for('user_signup') }}" method=post>
+<form action="{{ url_for('customer_signup') }}" method=post>
     {{ form.hidden_tag() }}
     <div>
-        {{ form.firstname.label }}
-        {{ form.firstname }}
+        {{ form.first_name.label }}
+        {{ form.first_name }}
     </div>
     <div>
-        {{ form.lastname.label }}
-        {{ form.lastname }}
+        {{ form.last_name.label }}
+        {{ form.last_name }}
     </div>
     <div>
         {{ form.email.label }}

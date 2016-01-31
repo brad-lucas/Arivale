@@ -10,6 +10,7 @@ app = Flask(__name__)
 app.secret_key = 'development key'
 
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql+psycopg2://postgres:admin@localhost/arivale_scheduling_db'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True
 
 from arivale_scheduling.models import db
 db.init_app(app)

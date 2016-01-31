@@ -3,44 +3,155 @@
 <div class="jumbo">
     <h2>{{ session['coach_email'] }}'s profile</h2>
 </div>
+<hr />
+<div class="row">
+    <h3>Availability</h3>
+</div>
+<div class="row">
+    <h4>Past</h4>
+    <div id="past-availability">
+        {% if past_slots|length == 0 %}
+        <div><span>No past appointments.</span></div>
+        {% else %}
+        {% for slot in past_slots %}
+        <div>
+            <div>
+                <span><b>Slot start time:</b> {{ slot['start_timestamp_str'] }}</span>
+            </div>
+        </div>
+        {% endfor %}
+        {% endif %}
+    </div>
+</div>
+<div class="row">
+    <h4>Booked</h4>
+    <div id="booked-availability">
+        {% if booked_slots|length == 0 %}
+        <div><span>No booked appointments.</span></div>
+        {% else %}
+        {% for slot in booked_slots %}
+        <div class="booked-appointment">
+            <span><b>Slot start time:</b> {{ slot['start_timestamp_str'] }}</span><button data-availability-slot-id="{{ slot['id'] }}">Cancel Appointment</button>
+        </div>
+        {% endfor %}
+        {% endif %}
+    </div>
+</div>
+<div class="row">
+    <h4>Unbooked</h4>
+    <div id="upcoming-availability">
+        {% if availability_slots|length == 0 %}
+        <div><span>No unbooked time slots.</span></div>
+        {% else %}
+        {% for slot in availability_slots %}
+        <div>
+            <div>
+                <span><b>Slot start time:</b> {{ slot['start_timestamp_str'] }}</span>
+            </div>
+        </div>
+        {% endfor %}
+        {% endif %}
+    </div>
+</div>
+<div class="row">
+    <h4>Add availability</h4>
+    <div><button>Add</button></div>
+</div>
+<hr />
+<div class="row">
+    <h3>Clientele</h3>
+</div>
 {% if existing_clients != None: %}
 <div class="row">
-    <div class="existing-clients">
-    {% for existing_client in existing_clients %}
-        <h3>Existing clients:</h3>
-        <span><b>Name:</b> {{ existing_client.firstname }} {{ existing_client.lastname }}</span>
+    <h4>Existing clients</h4>
+    <div id="existing-clients">
+        {% if existing_clients|length == 0 %}
+        <div id="no-existing-clients"><span>No existing clients.</span></div>
+        {% else %}
+        {% for existing_client in existing_clients %}
+        <div>
+            <span><b>Name:</b> {{ existing_client.first_name }} {{ existing_client.last_name }}</span>
+        </div>
+        {% endfor %}
+        {% endif %}
     </div>
-    {% endfor %}
 </div>
 {% endif %}
 {% if potential_clients != None: %}
 <div class="row">
-    {% for potential_client in potential_clients %}
-    <div class="potential-clients">
-        <h3>Potential clients:</h3>
-        <span><b>Name:</b> {{ potential_client.firstname }} {{ potential_client.lastname }}</span><button data-client-id="{{ potential_client.uid }}">Add to clientele</button>
+    <h4>Potential clients</h4>
+    <div id="potential-clients">
+        {% if potential_clients|length == 0 %}
+        <div id="no-potential-clients"><span>No potential clients.</span></div>
+        {% else %}
+        {% for potential_client in potential_clients %}
+        <div>
+            <span><b>Name:</b> {{ potential_client.first_name }} {{ potential_client.last_name }}</span><button data-client-id="{{ potential_client.customer_id }}">Add to clientele</button>
+        </div>
+        {% endfor %}
+        {% endif %}
     </div>
-    {% endfor %}
 </div>
 <script type="text/javascript">
-    $('.potential-clients button').click(function addToClientele() {
+    $('#booked-availability button').click(function cancelBookedAppointment() {
         var $this = $(this),
-            $newSpan = $('span'),
+            $parent = $this.parent(),
+            $newSpan = $('<span />'),
             somethingHappenedClass = 'something-happened';
 
-        $this.parent().find('span.' + somethingHappenedClass).remove();
+        $parent.find('span.' + somethingHappenedClass).remove();
 
-        $.post('/coach/add_client/' + $this.data('clientId'))
-            .done(function clientSuccessfullyAdded(data, textStatus, jqXHR ) {
-                $this.replaceWith($newSpan.text('Success!'));
+        var appointmentCanceled = function () {
+            $parent.html($newSpan.text('Appointment canceled.').html());
+            setTimeout(function removeText() {
+                if ($('.booked-appointment').length > 1) {
+                    $parent.remove();
+                } else {
+                    $parent.html($newSpan.text('No booked appointments.').html());
+                }
+            }, 2000);
+        };
+
+        $.post('/coach/availability/cancel/' + $this.data('availabilitySlotId'))
+            .done(function clientSuccessfullyAdded(data, textStatus, jqXHR) {
+                appointmentCanceled();
             })
             .fail(function clientAddFailed(jqXHR, textStatus, errorThrown) {
-                switch (jqXHR.statusCode) {
+                switch (jqXHR.status) {
+                    case 404:
+                        appointmentCanceled();
+                        break;
+
+                    default:
+                        $parent().append($newSpan.addClass(somethingHappenedClass).text('Something happened, try again!'));
+                        break;
+                }
+            });
+    });
+
+    $('#potential-clients button').click(function addToClientele() {
+        var $this = $(this),
+            $parent = $this.parent(),
+            $newSpan = $('<span />'),
+            somethingHappenedClass = 'something-happened';
+
+        $parent.find('span.' + somethingHappenedClass).remove();
+
+        $.post('/coach/clients/add/' + $this.data('clientId'))
+            .done(function clientSuccessfullyAdded(data, textStatus, jqXHR) {
+                $this.remove();
+                $('#no-existing-clients').remove();
+                $('#existing-clients').append($parent);
+            })
+            .fail(function clientAddFailed(jqXHR, textStatus, errorThrown) {
+                switch (jqXHR.status) {
                     case 409:
                         $this.replaceWith($newSpan.text('Looks like someone beat you to it...'));
-                       
+                        break;
+
                     default:
-                        $this.parent().append($newSpan.addClass(somethingHappenedClass).text('Something happened, try again!'));
+                        $parent().append($newSpan.addClass(somethingHappenedClass).text('Something happened, try again!'));
+                        break;
                 }
             });
     });
