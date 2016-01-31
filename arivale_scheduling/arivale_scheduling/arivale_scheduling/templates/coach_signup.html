@@ -1,0 +1,45 @@
+﻿{% extends "coach_layout.html" %}
+
+{% block content %}
+<h2>Sign up</h2>
+
+  {% for message in form.firstname.errors %}
+<div class="flash">{{ message }}</div>
+  {% endfor %}
+
+  {% for message in form.lastname.errors %}
+<div class="flash">{{ message }}</div>
+  {% endfor %}
+
+  {% for message in form.email.errors %}
+<div class="flash">{{ message }}</div>
+  {% endfor %}
+
+  {% for message in form.password.errors %}
+<div class="flash">{{ message }}</div>
+  {% endfor %}
+
+<form action="{{ url_for('coach_signup') }}" method=post>
+    {{ form.hidden_tag() }}
+    <div>
+        {{ form.firstname.label }}
+        {{ form.firstname }}
+    </div>
+    <div>
+        {{ form.lastname.label }}
+        {{ form.lastname }}
+    </div>
+    <div>
+        {{ form.email.label }}
+        {{ form.email }}
+    </div>
+    <div>
+        {{ form.password.label }}
+        {{ form.password }}
+    </div>
+    <div>
+        {{ form.submit }}
+    </div>
+</form>
+
+{% endblock %}

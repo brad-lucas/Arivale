@@ -1,0 +1,137 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
+  <PropertyGroup>
+    <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>0d334ca1-90db-4ea1-ab3f-1f0be4115190</ProjectGuid>
+    <ProjectHome>.</ProjectHome>
+    <ProjectTypeGuids>{789894c7-04a9-4a11-a6b5-3f4435165112};{1b580a1a-fdb3-4b32-83e1-6407eb2722e6};{349c5851-65df-11da-9384-00065b846f21};{888888a0-9f3d-457c-b088-3a5042f75d52}</ProjectTypeGuids>
+    <StartupFile>runserver.py</StartupFile>
+    <SearchPath>
+    </SearchPath>
+    <WorkingDirectory>.</WorkingDirectory>
+    <LaunchProvider>Web launcher</LaunchProvider>
+    <OutputPath>.</OutputPath>
+    <StaticUriPattern>^/static/.*</StaticUriPattern>
+    <StaticUriRewrite>^/$(MSBuildProjectName)/static/.*</StaticUriRewrite>
+    <PythonWsgiHandler>$(MSBuildProjectName).app</PythonWsgiHandler>
+    <Name>arivale_scheduling</Name>
+    <RootNamespace>arivale_scheduling</RootNamespace>
+    <InterpreterId>{f15eb79a-24ce-4076-a137-b2931bce448d}</InterpreterId>
+    <InterpreterVersion>3.4</InterpreterVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+    <DebugSymbols>true</DebugSymbols>
+    <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+    <DebugSymbols>true</DebugSymbols>
+    <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="arivale_scheduling\forms.py" />
+    <Compile Include="arivale_scheduling\models.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="runserver.py" />
+    <Compile Include="arivale_scheduling\__init__.py" />
+    <Compile Include="arivale_scheduling\views.py" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="arivale_scheduling\" />
+    <Folder Include="arivale_scheduling\static\" />
+    <Folder Include="arivale_scheduling\static\content\" />
+    <Folder Include="arivale_scheduling\static\fonts\" />
+    <Folder Include="arivale_scheduling\static\scripts\" />
+    <Folder Include="arivale_scheduling\templates\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="arivale_scheduling\templates\user_signup.html" />
+    <Content Include="arivale_scheduling\templates\user_signin.html" />
+    <Content Include="arivale_scheduling\templates\user_profile.html" />
+    <Content Include="arivale_scheduling\templates\user_layout.html" />
+    <Content Include="arivale_scheduling\templates\user_landing.html" />
+    <Content Include="arivale_scheduling\templates\coach_profile.html" />
+    <Content Include="arivale_scheduling\templates\coach_signin.html" />
+    <Content Include="arivale_scheduling\templates\coach_signup.html" />
+    <Content Include="requirements.txt" />
+    <Content Include="arivale_scheduling\static\content\bootstrap.css" />
+    <Content Include="arivale_scheduling\static\content\bootstrap.min.css" />
+    <Content Include="arivale_scheduling\static\content\site.css" />
+    <Content Include="arivale_scheduling\static\fonts\glyphicons-halflings-regular.eot" />
+    <Content Include="arivale_scheduling\static\fonts\glyphicons-halflings-regular.svg" />
+    <Content Include="arivale_scheduling\static\fonts\glyphicons-halflings-regular.ttf" />
+    <Content Include="arivale_scheduling\static\fonts\glyphicons-halflings-regular.woff" />
+    <Content Include="arivale_scheduling\static\scripts\bootstrap.js" />
+    <Content Include="arivale_scheduling\static\scripts\bootstrap.min.js" />
+    <Content Include="arivale_scheduling\static\scripts\jquery-1.10.2.intellisense.js" />
+    <Content Include="arivale_scheduling\static\scripts\jquery-1.10.2.js" />
+    <Content Include="arivale_scheduling\static\scripts\jquery-1.10.2.min.js" />
+    <Content Include="arivale_scheduling\static\scripts\jquery-1.10.2.min.map" />
+    <Content Include="arivale_scheduling\static\scripts\jquery.validate-vsdoc.js" />
+    <Content Include="arivale_scheduling\static\scripts\jquery.validate.js" />
+    <Content Include="arivale_scheduling\static\scripts\jquery.validate.min.js" />
+    <Content Include="arivale_scheduling\static\scripts\jquery.validate.unobtrusive.js" />
+    <Content Include="arivale_scheduling\static\scripts\jquery.validate.unobtrusive.min.js" />
+    <Content Include="arivale_scheduling\static\scripts\modernizr-2.6.2.js" />
+    <Content Include="arivale_scheduling\static\scripts\respond.js" />
+    <Content Include="arivale_scheduling\static\scripts\respond.min.js" />
+    <Content Include="arivale_scheduling\static\scripts\_references.js" />
+    <Content Include="arivale_scheduling\templates\coach_landing.html" />
+    <Content Include="arivale_scheduling\templates\coach_layout.html" />
+  </ItemGroup>
+  <ItemGroup>
+    <Interpreter Include="env\">
+      <Id>{f15eb79a-24ce-4076-a137-b2931bce448d}</Id>
+      <BaseInterpreter>{2af0f10d-7135-4994-9156-5d01c9c11b7e}</BaseInterpreter>
+      <Version>3.4</Version>
+      <Description>env (Python 3.4)</Description>
+      <InterpreterPath>Scripts\python.exe</InterpreterPath>
+      <WindowsInterpreterPath>Scripts\pythonw.exe</WindowsInterpreterPath>
+      <LibraryPath>Lib\</LibraryPath>
+      <PathEnvironmentVariable>PYTHONPATH</PathEnvironmentVariable>
+      <Architecture>X86</Architecture>
+    </Interpreter>
+  </ItemGroup>
+  <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.Web.targets" />
+  <!-- Specify pre- and post-build commands in the BeforeBuild and 
+       AfterBuild targets below. -->
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  <ProjectExtensions>
+    <VisualStudio>
+      <FlavorProperties GUID="{349c5851-65df-11da-9384-00065b846f21}">
+        <WebProjectProperties>
+          <AutoAssignPort>True</AutoAssignPort>
+          <UseCustomServer>True</UseCustomServer>
+          <CustomServerUrl>http://localhost</CustomServerUrl>
+          <SaveServerSettingsInUserFile>False</SaveServerSettingsInUserFile>
+        </WebProjectProperties>
+      </FlavorProperties>
+      <FlavorProperties GUID="{349c5851-65df-11da-9384-00065b846f21}" User="">
+        <WebProjectProperties>
+          <StartPageUrl>
+          </StartPageUrl>
+          <StartAction>CurrentPage</StartAction>
+          <AspNetDebugging>True</AspNetDebugging>
+          <SilverlightDebugging>False</SilverlightDebugging>
+          <NativeDebugging>False</NativeDebugging>
+          <SQLDebugging>False</SQLDebugging>
+          <ExternalProgram>
+          </ExternalProgram>
+          <StartExternalURL>
+          </StartExternalURL>
+          <StartCmdLineArguments>
+          </StartCmdLineArguments>
+          <StartWorkingDirectory>
+          </StartWorkingDirectory>
+          <EnableENC>False</EnableENC>
+          <AlwaysStartWebServerOnDebug>False</AlwaysStartWebServerOnDebug>
+        </WebProjectProperties>
+      </FlavorProperties>
+    </VisualStudio>
+  </ProjectExtensions>
+</Project>

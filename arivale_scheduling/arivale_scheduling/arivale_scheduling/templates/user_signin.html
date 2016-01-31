@@ -1,0 +1,26 @@
+﻿{% extends "user_layout.html" %}
+
+{% block content %}
+<h2>Sign In</h2>
+<form action="{{ url_for('user_signin') }}" method=post>
+    {{ form.hidden_tag() }}
+    <div>
+        {{ form.email.label }}
+        {{ form.email }}
+    </div>
+    {% for message in form.email.errors %}
+    <div class="flash">{{ message }}</div>
+    {% endfor %}
+    <div>
+        {{ form.password.label }}
+        {{ form.password }}
+    </div>
+    {% for message in form.password.errors %}
+    <div class="flash">{{ message }}</div>
+    {% endfor %}
+    <div>
+        {{ form.submit }}
+    </div>
+</form>
+
+{% endblock %}
