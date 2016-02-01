@@ -2,6 +2,114 @@
 {% block content %}
 <div class="jumbo">
     <h2>Profile</h2>
-    <h3>This is {{ session['customer_email'] }}'s profile page</h3>
+    <h3>Hi, {{ customer.first_name }}!</h3>
 </div>
+<hr />
+<div class="row">
+    <h3>Appointments</h3>
+</div>
+<div class="row">
+    <h4>Past</h4>
+    <div id="past-availability">
+        {% if slots_for_ux['past']|length == 0 %}
+        <div><span>No past appointments.</span></div>
+        {% else %}
+        {% for slot in slots_for_ux['past'] %}
+        <div>
+            <span>{{ slot['display_text'] }}</span>
+        </div>
+        {% endfor %}
+        {% endif %}
+    </div>
+</div>
+<div class="row">
+    <h4>Booked</h4>
+    <div id="booked-availability">
+        {% if slots_for_ux['booked']|length == 0 %}
+        <div><span>No booked appointments.</span></div>
+        {% else %}
+        {% for slot in slots_for_ux['booked'] %}
+        <div class="booked-appointment">
+            <span>{{ slot['display_text'] }}</span>
+            <button data-availability-slot-id="{{ slot['id'] }}">Cancel</button>
+        </div>
+        {% endfor %}
+        {% endif %}
+    </div>
+</div>
+<div class="row">
+    <h4>Book appointment</h4>
+    <div>
+        <div>
+            <div><span>Your coach, {{ customer.coach.first_name }}, is available for the following times. Pick one.</span></div>
+            <div id="book-appointment-control">
+                <select>
+                    {% for availability in customer.coach.get_upcoming_availability() %}
+                    <option value="{{ availability.slot_id }}">{{ availability.get_window_display_text() }}</option>
+                    {% endfor %}
+                </select>
+                <button>Book</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    var $bookAppointmentControl = $('#book-appointment-control');
+    $bookAppointmentControl.find('button').click(function bookAppointment() {
+        var appointmentBooked = function () {
+        };
+
+        $.post('/appointments/book/' + $bookAppointmentControl.find('select :selected').val())
+            .done(function appointmentSuccessfullyBooked(data, textStatus, jqXHR) {
+                appointmentBooked();
+            })
+            .fail(function bookAppointmentFailed(jqXHR, textStatus, errorThrown) {
+                switch (jqXHR.status) {
+                    case 404:
+                        appointmentBooked();
+                        break;
+
+                    default:
+                        break;
+                }
+            });
+    });
+    
+    $('#booked-availability button').click(function cancelBookedAppointment() {
+        var $this = $(this),
+            $parent = $this.parent(),
+            $newSpan = $('<span />'),
+            somethingHappenedClass = 'something-happened';
+
+        $parent.find('span.' + somethingHappenedClass).remove();
+
+        var appointmentCanceled = function () {
+            $parent.html($newSpan.text('Appointment canceled.').html());
+            setTimeout(function removeText() {
+                if ($('.booked-appointment').length > 1) {
+                    $parent.remove();
+                } else {
+                    $parent.html($newSpan.text('No booked appointments.').html());
+                }
+            }, 2000);
+        };
+
+        $.post('/appointments/cancel/' + $this.data('availabilitySlotId'))
+            .done(function appointmentSuccessfullyCanceled(data, textStatus, jqXHR) {
+                appointmentCanceled();
+            })
+            .fail(function clientAddFailed(jqXHR, textStatus, errorThrown) {
+                switch (jqXHR.status) {
+                    case 404:
+                        appointmentCanceled();
+                        break;
+
+                    default:
+                        $parent.append($newSpan.addClass(somethingHappenedClass).text('Something happened, try again!'));
+                        break;
+                }
+            });
+    });
+</script>
 {% endblock %}

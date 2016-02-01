@@ -13,6 +13,7 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql+psycopg2://postgres:admin@lo
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True
 
 from datetime import datetime, timedelta
+current_datetime = datetime.now()
 appointment_slot_length_in_hours = timedelta(hours=1)
 
 from arivale_scheduling.models import db

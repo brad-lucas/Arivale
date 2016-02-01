@@ -1,6 +1,6 @@
 import sys
 
-from arivale_scheduling import appointment_slot_length_in_hours
+from arivale_scheduling import current_datetime, appointment_slot_length_in_hours
 from flask.ext.sqlalchemy import SQLAlchemy
 from sqlalchemy.ext.declarative import declared_attr
 from werkzeug import generate_password_hash, check_password_hash
@@ -54,13 +54,20 @@ class Coach(LoginBase):
   coach_id = db.Column(db.Integer, primary_key=True)
 
   clients = db.relationship('Customer')
-  availability_slots = db.relationship('CoachAvailabilitySlot', order_by = 'asc(CoachAvailabilitySlot.window_start_utc)')
+  schedule = db.relationship('CoachAvailabilitySlot', order_by = 'asc(CoachAvailabilitySlot.window_start_utc)', lazy='dynamic')
+
+  def get_upcoming_availability(self):
+    return self.schedule.filter_by(
+      customer_id = None).filter(
+        CoachAvailabilitySlot.window_start_utc > current_datetime).all()
 
 class Customer(LoginBase):
   customer_id = db.Column(db.Integer, primary_key=True)
 
   coach = db.relationship('Coach')
   coach_id = db.Column(db.Integer, db.ForeignKey('coach.coach_id'))
+
+  appointments = db.relationship('CoachAvailabilitySlot', order_by = 'asc(CoachAvailabilitySlot.window_start_utc)')
 
   def set_coach(self, email):     
     self.coach_id = Coach.query.filter_by(email = email).first().coach_id
@@ -84,3 +91,12 @@ class CoachAvailabilitySlot(EntityBase):
 
   def get_window_end(self):
     return self.window_start_utc + appointment_slot_length_in_hours
+  
+  def get_window_display_text(self):
+    return self.__format_date__(self.window_start_utc) + ': ' + self.__format_time__(self.window_start_utc) + ' - ' + self.__format_time__(self.get_window_end())
+
+  def __format_date__(self, datetime):
+    return datetime.strftime("%Y-%m-%d")
+
+  def __format_time__(self, datetime):
+    return datetime.strftime("%I:%M%p")

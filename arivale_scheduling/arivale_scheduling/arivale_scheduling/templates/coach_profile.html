@@ -10,12 +10,12 @@
 <div class="row">
     <h4>Past</h4>
     <div id="past-availability">
-        {% if past_slots|length == 0 %}
+        {% if slots_for_ux['past']|length == 0 %}
         <div><span>No past appointments.</span></div>
         {% else %}
-        {% for slot in past_slots %}
+        {% for slot in slots_for_ux['past'] %}
         <div>
-            <span><b>{{ slot['date'] }}:</b> {{ slot['start_time'] }} - {{ slot['end_time'] }}</span>
+            <span>{{ slot['display_text'] }}</span>
         </div>
         {% endfor %}
         {% endif %}
@@ -24,13 +24,13 @@
 <div class="row">
     <h4>Booked</h4>
     <div id="booked-availability">
-        {% if booked_slots|length == 0 %}
+        {% if slots_for_ux['booked']|length == 0 %}
         <div><span>No booked appointments.</span></div>
         {% else %}
-        {% for slot in booked_slots %}
+        {% for slot in slots_for_ux['booked'] %}
         <div class="booked-appointment">
-            <span><b>{{ slot['date'] }}:</b> {{ slot['start_time'] }} - {{ slot['end_time'] }}</span>
-            <button data-availability-slot-id="{{ slot['id'] }}">Cancel Appointment</button>
+            <span>{{ slot['display_text'] }}</span>
+            <button data-availability-slot-id="{{ slot['id'] }}">Cancel</button>
         </div>
         {% endfor %}
         {% endif %}
@@ -39,12 +39,13 @@
 <div class="row">
     <h4>Unbooked</h4>
     <div id="upcoming-availability">
-        {% if availability_slots|length == 0 %}
+        {% if slots_for_ux['upcoming']|length == 0 %}
         <div><span>No unbooked time slots.</span></div>
         {% else %}
-        {% for slot in availability_slots %}
-        <div>
-            <span><b>{{ slot['date'] }}:</b> {{ slot['start_time'] }} - {{ slot['end_time'] }}</span>
+        {% for slot in slots_for_ux['upcoming'] %}
+        <div class="upcoming-appointment">
+            <span>{{ slot['display_text'] }}</span>
+            <button data-availability-slot-id="{{ slot['id'] }}">Delete</button>
         </div>
         {% endfor %}
         {% endif %}
@@ -150,7 +151,7 @@
             }, 2000);
         };
 
-        $.post('/coach/availability/cancel/' + $this.data('availabilitySlotId'))
+        $.post('/appointments/cancel/' + $this.data('availabilitySlotId'))
             .done(function clientSuccessfullyAdded(data, textStatus, jqXHR) {
                 appointmentCanceled();
             })
@@ -158,6 +159,42 @@
                 switch (jqXHR.status) {
                     case 404:
                         appointmentCanceled();
+                        break;
+
+                    default:
+                        $parent.append($newSpan.addClass(somethingHappenedClass).text('Something happened, try again!'));
+                        break;
+                }
+            });
+    });
+
+    $('#upcoming-availability button').click(function cancelBookedAppointment() {
+        var $this = $(this),
+            $parent = $this.parent(),
+            $newSpan = $('<span />'),
+            somethingHappenedClass = 'something-happened';
+
+        $parent.find('span.' + somethingHappenedClass).remove();
+
+        var appointmentDeleted = function () {
+            $parent.html($newSpan.text('Appointment deleted.').html());
+            setTimeout(function removeText() {
+                if ($('.upcoming-appointment').length > 1) {
+                    $parent.remove();
+                } else {
+                    $parent.html($newSpan.text('No booked appointments.').html());
+                }
+            }, 2000);
+        };
+
+        $.post('/appointments/delete/' + $this.data('availabilitySlotId'))
+            .done(function deleteAppointmentSuccess(data, textStatus, jqXHR) {
+                appointmentDeleted();
+            })
+            .fail(function deleteAppointmentFailed(jqXHR, textStatus, errorThrown) {
+                switch (jqXHR.status) {
+                    case 404:
+                        appointmentDeleted();
                         break;
 
                     default:
