@@ -15,9 +15,7 @@
         {% else %}
         {% for slot in past_slots %}
         <div>
-            <div>
-                <span><b>Slot start time:</b> {{ slot['start_timestamp_str'] }}</span>
-            </div>
+            <span><b>{{ slot['date'] }}:</b> {{ slot['start_time'] }} - {{ slot['end_time'] }}</span>
         </div>
         {% endfor %}
         {% endif %}
@@ -31,7 +29,8 @@
         {% else %}
         {% for slot in booked_slots %}
         <div class="booked-appointment">
-            <span><b>Slot start time:</b> {{ slot['start_timestamp_str'] }}</span><button data-availability-slot-id="{{ slot['id'] }}">Cancel Appointment</button>
+            <span><b>{{ slot['date'] }}:</b> {{ slot['start_time'] }} - {{ slot['end_time'] }}</span>
+            <button data-availability-slot-id="{{ slot['id'] }}">Cancel Appointment</button>
         </div>
         {% endfor %}
         {% endif %}
@@ -45,9 +44,7 @@
         {% else %}
         {% for slot in availability_slots %}
         <div>
-            <div>
-                <span><b>Slot start time:</b> {{ slot['start_timestamp_str'] }}</span>
-            </div>
+            <span><b>{{ slot['date'] }}:</b> {{ slot['start_time'] }} - {{ slot['end_time'] }}</span>
         </div>
         {% endfor %}
         {% endif %}
@@ -55,7 +52,21 @@
 </div>
 <div class="row">
     <h4>Add availability</h4>
-    <div><button>Add</button></div>
+    <div>
+        <div>
+            <div><span>Pick a start time that doesn't collide with an existing availability slot.</span></div>
+            <div id="add-availability-control">
+                <input type="date" min="{{ current_datetime.date() }}">
+                <input type="time" list="times">
+                <datalist id="times">
+                    {% for time_slot in time_slot_generator %}
+                    <option>{{ time_slot }}</option>
+                    {% endfor %}
+                </datalist>
+                <button>Add</button>
+            </div>
+        </div>
+    </div>
 </div>
 <hr />
 <div class="row">
@@ -92,7 +103,34 @@
         {% endif %}
     </div>
 </div>
+{% endif %}
 <script type="text/javascript">
+    var $addAvailabilityControl = $('#add-availability-control');
+    $addAvailabilityControl.find('button').click(function addAvailability() {
+        var availabilityValues = [];
+        $addAvailabilityControl.find('input').each(function () {
+            var val = $(this).val();
+            if (val && val.length > 0) {
+                availabilityValues.push(val);
+            }
+        });
+
+        if (availabilityValues.length === 2) {
+            $.post('/coach/availability/add/' + availabilityValues.join(' '))
+                .done(function availabilityAdded(data, textStatus, jqXHR) {
+                })
+                .fail(function availabilityAddFailed(jqXHR, textStatus, errorThrown) {
+                    switch (jqXHR.status) {
+                        case 409:
+                            break;
+
+                        default:
+                            break;
+                    }
+                });
+        }
+    });
+
     $('#booked-availability button').click(function cancelBookedAppointment() {
         var $this = $(this),
             $parent = $this.parent(),
@@ -123,7 +161,7 @@
                         break;
 
                     default:
-                        $parent().append($newSpan.addClass(somethingHappenedClass).text('Something happened, try again!'));
+                        $parent.append($newSpan.addClass(somethingHappenedClass).text('Something happened, try again!'));
                         break;
                 }
             });
@@ -150,11 +188,10 @@
                         break;
 
                     default:
-                        $parent().append($newSpan.addClass(somethingHappenedClass).text('Something happened, try again!'));
+                        $parent.append($newSpan.addClass(somethingHappenedClass).text('Something happened, try again!'));
                         break;
                 }
             });
     });
 </script>
-{% endif %}
 {% endblock %}

@@ -20,6 +20,7 @@
     <RootNamespace>arivale_scheduling</RootNamespace>
     <InterpreterId>{f15eb79a-24ce-4076-a137-b2931bce448d}</InterpreterId>
     <InterpreterVersion>3.4</InterpreterVersion>
+    <NameOfLastUsedPublishProfile>brad-lucas-projects-arivale-scheduling - Web Deploy</NameOfLastUsedPublishProfile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
     <DebugSymbols>true</DebugSymbols>
@@ -50,14 +51,15 @@
     <Content Include="arivale_scheduling\templates\default_landing.html" />
     <Content Include="arivale_scheduling\templates\default_layout.html" />
     <Content Include="arivale_scheduling\templates\empty.html" />
-    <Content Include="arivale_scheduling\templates\user_signup.html" />
-    <Content Include="arivale_scheduling\templates\user_signin.html" />
-    <Content Include="arivale_scheduling\templates\user_profile.html" />
-    <Content Include="arivale_scheduling\templates\user_layout.html" />
-    <Content Include="arivale_scheduling\templates\user_landing.html" />
+    <Content Include="arivale_scheduling\templates\customer_signup.html" />
+    <Content Include="arivale_scheduling\templates\customer_signin.html" />
+    <Content Include="arivale_scheduling\templates\customer_profile.html" />
+    <Content Include="arivale_scheduling\templates\customer_layout.html" />
+    <Content Include="arivale_scheduling\templates\customer_landing.html" />
     <Content Include="arivale_scheduling\templates\coach_profile.html" />
     <Content Include="arivale_scheduling\templates\coach_signin.html" />
     <Content Include="arivale_scheduling\templates\coach_signup.html" />
+    <None Include="brad-lucas-projects-arivale-scheduling - Web Deploy.pubxml" />
     <Content Include="requirements.txt" />
     <Content Include="arivale_scheduling\static\content\bootstrap.css" />
     <Content Include="arivale_scheduling\static\content\bootstrap.min.css" />
