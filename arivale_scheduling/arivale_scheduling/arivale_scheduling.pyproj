@@ -31,10 +31,14 @@
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="arivale_scheduling\appointment_api_views.py" />
     <Compile Include="arivale_scheduling\forms.py" />
     <Compile Include="arivale_scheduling\models.py">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="arivale_scheduling\coach_views.py" />
+    <Compile Include="arivale_scheduling\customer_views.py" />
+    <Compile Include="arivale_scheduling\views_base.py" />
     <Compile Include="runserver.py" />
     <Compile Include="arivale_scheduling\__init__.py" />
     <Compile Include="arivale_scheduling\views.py" />

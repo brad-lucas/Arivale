@@ -40,17 +40,23 @@
 <div class="row">
     <h4>Book appointment</h4>
     <div>
+        {% if customer.coach == None %}
         <div>
-            <div><span>Your coach, {{ customer.coach.first_name }}, is available for the following times. Pick one.</span></div>
-            <div id="book-appointment-control">
-                <select>
-                    {% for availability in customer.coach.get_upcoming_availability() %}
-                    <option value="{{ availability.slot_id }}">{{ availability.get_window_display_text() }}</option>
-                    {% endfor %}
-                </select>
-                <button>Book</button>
-            </div>
+            <span>You don't have a coach yet.</span>
         </div>
+        {% else %}
+        <div>
+            <span>Your coach, {{ customer.coach.first_name }}, is available for the following times. Pick one.</span>
+        </div>
+        <div id="book-appointment-control">
+            <select>
+                {% for availability in customer.coach.get_upcoming_availability() %}
+                <option value="{{ availability.slot_id }}">{{ availability.get_window_display_text() }}</option>
+                {% endfor %}
+            </select>
+            <button>Book</button>
+        </div>
+        {% endif %}
     </div>
 </div>
 
