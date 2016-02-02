@@ -71,3 +71,28 @@ form input#password {
     appearance: none;
     margin: 0; 
 }
+
+.availability-container { margin: 20px 0; }
+
+div[id$="-availability"] div[class$="-appointment"],
+div[id$="-clients"] div[class$="-client"] {
+    height: 30px;
+    margin: 5px 0;
+}
+div[id$="-availability"] div[class$="-appointment"]:first-of-type,
+div[id$="-clients"] div[class$="-client"]:first-of-type {
+    margin-top: 0;
+}
+div[id$="-availability"] div[class$="-appointment"]:last-of-type,
+div[id$="-clients"] div[class$="-client"]:last-of-type {
+    margin-bottom: 0;
+}
+
+div[id$="-availability"] div[class$="-appointment"] .appointment-display-text,
+div[id$="-clients"] div[class$="-client"] .client-display-text {
+    display:inline-block;
+    width: 35%;
+}
+
+div[id$="-availability"] div[class$="-appointment"] button {
+}

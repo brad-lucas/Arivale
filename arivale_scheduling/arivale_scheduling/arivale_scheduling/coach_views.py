@@ -41,14 +41,16 @@ def coach_profile():
 
   slots_for_ux = get_coach_availability_slots_for_ux(coach.schedule)
         
-  return render_template('coach_profile.html',
-      title='Coach Profile',
-      year=get_current_year(),
-      current_datetime = current_datetime,
-      time_slot_generator = get_timeslot_list_generator(range(8, 18)),
-      slots_for_ux = slots_for_ux,
-      existing_clients = coach.clients,
-      potential_clients = Customer.query.filter_by(coach_id = None).all())
+  return render_template(
+    'coach_profile.html',
+    title='Coach Profile',
+    year=get_current_year(),
+    current_datetime = current_datetime,
+    user = coach,
+    time_slot_generator = get_timeslot_list_generator(range(8, 18)),
+    slots_for_ux = slots_for_ux,
+    existing_clients = coach.clients,
+    potential_clients = Customer.query.filter_by(coach_id = None).all())
 
 #####################################################################################
 # API routes

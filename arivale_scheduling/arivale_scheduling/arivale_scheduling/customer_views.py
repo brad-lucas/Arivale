@@ -38,9 +38,10 @@ def customer_profile():
 
   slots_for_ux = get_coach_availability_slots_for_ux(customer.appointments)
   
-  return render_template('customer_profile.html',
-      title='Customer Profile',
-      year=get_current_year(),
-      current_datetime = current_datetime,
-      customer = customer,
-      slots_for_ux = slots_for_ux)
+  return render_template(
+    'customer_profile.html',
+    title='Customer Profile',
+    year=get_current_year(),
+    current_datetime = current_datetime,
+    user = customer,
+    slots_for_ux = slots_for_ux)

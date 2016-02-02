@@ -1,14 +1,11 @@
 ﻿{% extends "customer_layout.html" %}
 {% block content %}
 <div class="jumbo">
-    <h2>Profile</h2>
-    <h3>Hi, {{ customer.first_name }}!</h3>
+    <h2>{{ user.first_name }} {{ user.last_name }}'s Customer Profile</h2>
 </div>
 <hr />
-<div class="row">
-    <h3>Appointments</h3>
-</div>
-<div class="row">
+<h3>Appointments</h3>
+<div class="availability-container">
     <h4>Past</h4>
     <div id="past-availability">
         {% if slots_for_ux['past']|length == 0 %}
@@ -16,13 +13,13 @@
         {% else %}
         {% for slot in slots_for_ux['past'] %}
         <div>
-            <span>{{ slot['display_text'] }}</span>
+            <span class="appointment-display-text">{{ slot['display_text'] }}</span>
         </div>
         {% endfor %}
         {% endif %}
     </div>
 </div>
-<div class="row">
+<div class="availability-container">
     <h4>Booked</h4>
     <div id="booked-availability">
         {% if slots_for_ux['booked']|length == 0 %}
@@ -32,31 +29,31 @@
         {% else %}
         {% for slot in slots_for_ux['booked'] %}
         <div class="booked-appointment">
-            <span>{{ slot['display_text'] }}</span>
+            <span class="appointment-display-text">{{ slot['display_text'] }}</span>
             <button data-availability-slot-id="{{ slot['id'] }}">Cancel</button>
         </div>
         {% endfor %}
         {% endif %}
     </div>
 </div>
-<div class="row">
+<div class="availability-container">
     <h4>Book appointment</h4>
     <div>
-        {% if customer.coach == None %}
-        <div>
+        {% if user.coach == None %}
+        <div style="margin-bottom: 5px;">
             <span>You don't have a coach yet.</span>
         </div>
         {% else %}
-        <div>
-            <span>Your coach, {{ customer.coach.first_name }}, is available for the following times. Pick one.</span>
+        <div style="margin-bottom: 5px;">
+            <span>Your coach, {{ user.coach.first_name }}, is available for the following times. Pick one.</span>
         </div>
         <div id="book-appointment-control">
             <select>
-                {% for availability in customer.coach.get_upcoming_availability() %}
+                {% for availability in user.coach.get_upcoming_availability() %}
                 <option value="{{ availability.slot_id }}">{{ availability.get_window_display_text() }}</option>
                 {% endfor %}
             </select>
-            <button>Book</button>
+            <button style="margin-left: 15px;">Book</button>
         </div>
         {% endif %}
     </div>
