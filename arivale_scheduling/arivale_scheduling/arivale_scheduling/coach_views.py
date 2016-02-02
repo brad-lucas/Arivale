@@ -2,7 +2,7 @@ import sys
 
 from datetime import datetime
 
-from flask import Flask, render_template, redirect, url_for, session
+from flask import Flask, render_template, redirect, url_for, session, jsonify
 from flask.ext.api import status
 
 from arivale_scheduling import app, current_datetime, appointment_slot_length_in_hours
@@ -13,7 +13,6 @@ from arivale_scheduling.views_base import *
 #####################################################################################
 # Web routes
 #####################################################################################
-
 @app.route('/coach')
 def coach_landing():
   return render_landing(Coach)
@@ -68,7 +67,6 @@ def coach_add_client(client_id):
       customer.set_coach(session['coach_email'])
       db.session.commit()
       status_code = status.HTTP_200_OK
-
     except:
       status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
 
@@ -94,10 +92,15 @@ def coach_add_availability(datetime_str):
     availability_slot_overlap_end = get_potential_availability_slot_overlap(availability_datetime_end, slots_by_coach)
     if availability_slot_overlap_end is None:
       try:
-        db.session.add(CoachAvailabilitySlot(coach_id, availability_datetime_start))
+        slot = CoachAvailabilitySlot(coach_id, availability_datetime_start)
+
+        db.session.add(slot)
         db.session.commit()
-        status_code = status.HTTP_200_OK
-    
+        
+        resp = jsonify({ 'id' : slot.slot_id, 'display_text': slot.get_window_display_text() });
+        resp.status_code = 200
+        return resp
+
       except:
         status_code = status.HTTP_500_INTERNAL_SERVER_ERROR      
 

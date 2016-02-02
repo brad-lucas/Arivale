@@ -26,7 +26,9 @@
     <h4>Booked</h4>
     <div id="booked-availability">
         {% if slots_for_ux['booked']|length == 0 %}
-        <div><span>No booked appointments.</span></div>
+        <div id="no-booked-appointments">
+            <span>No booked appointments.</span>
+        </div>
         {% else %}
         {% for slot in slots_for_ux['booked'] %}
         <div class="booked-appointment">
@@ -59,21 +61,39 @@
         {% endif %}
     </div>
 </div>
-
+<script type="text/template" id="booking-added">
+    <div class="booked-appointment">
+        <span class="display-text"></span>
+        <button data-availability-slot-id="">Cancel</button>
+        <span class="success-notification"><i>Appointment booked!</i></span>
+    </div>
+</script>
 <script type="text/javascript">
     var $bookAppointmentControl = $('#book-appointment-control');
     $bookAppointmentControl.find('button').click(function bookAppointment() {
-        var appointmentBooked = function () {
-        };
-
-        $.post('/appointments/book/' + $bookAppointmentControl.find('select :selected').val())
+        var $selected = $bookAppointmentControl.find('select :selected');
+        $.post('/appointments/book/' + $selected.val())
             .done(function appointmentSuccessfullyBooked(data, textStatus, jqXHR) {
-                appointmentBooked();
+                var $clonedTemplate = $($('#booking-added').html().trim());
+                $clonedTemplate.find('span.display-text').text(data.display_text);
+                $clonedTemplate.find('button').data('availabilitySlotId', data.id);
+
+                var $bookedAvailability = $('#booked-availability'),
+                    $noBookedAppointments = $bookedAvailability.find('#no-booked-appointments :first');
+
+                if ($noBookedAppointments && $noBookedAppointments.length) {
+                    $noBookedAppointments.remove();
+                }
+
+                $bookedAvailability.append($clonedTemplate);
+
+                $selected.remove()
+
+                setTimeout(function removeSuccessNotification() { $bookedAvailability.find('span.success-notification').remove(); }, 2000);
             })
             .fail(function bookAppointmentFailed(jqXHR, textStatus, errorThrown) {
                 switch (jqXHR.status) {
                     case 404:
-                        appointmentBooked();
                         break;
 
                     default:
@@ -81,7 +101,7 @@
                 }
             });
     });
-    
+
     $('#booked-availability button').click(function cancelBookedAppointment() {
         var $this = $(this),
             $parent = $this.parent(),

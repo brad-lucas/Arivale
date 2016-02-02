@@ -1,6 +1,6 @@
 import sys
 
-from flask import Flask, session
+from flask import Flask, session, jsonify
 from flask.ext.api import status
 
 from arivale_scheduling import app
@@ -42,6 +42,10 @@ def perform_appointment_operation(availability_slot_id, operation):
       operation(availability_slot)
       db.session.commit()
       status_code = status.HTTP_200_OK
+             
+      resp = jsonify({ 'id' : availability_slot.slot_id, 'display_text': availability_slot.get_window_display_text() });
+      resp.status_code = 200
+      return resp
     
     except:
       status_code = status.HTTP_500_INTERNAL_SERVER_ERROR

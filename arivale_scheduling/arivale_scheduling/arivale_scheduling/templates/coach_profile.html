@@ -40,7 +40,9 @@
     <h4>Unbooked</h4>
     <div id="upcoming-availability">
         {% if slots_for_ux['upcoming']|length == 0 %}
-        <div><span>No unbooked time slots.</span></div>
+        <div id="no-unbooked-slots">
+            <span>No unbooked time slots.</span>
+        </div>
         {% else %}
         {% for slot in slots_for_ux['upcoming'] %}
         <div class="upcoming-appointment">
@@ -105,6 +107,13 @@
     </div>
 </div>
 {% endif %}
+<script type="text/template" id="availability-added">
+    <div class="upcoming-appointment">
+        <span class="display-text"></span>
+        <button data-availability-slot-id="">Delete</button>
+        <span class="success-notification"><i>Availability added!</i></span>
+    </div>
+</script>
 <script type="text/javascript">
     var $addAvailabilityControl = $('#add-availability-control');
     $addAvailabilityControl.find('button').click(function addAvailability() {
@@ -117,8 +126,23 @@
         });
 
         if (availabilityValues.length === 2) {
-            $.post('/coach/availability/add/' + availabilityValues.join(' '))
+            var availabilityValuesStr = availabilityValues.join(' ');
+            $.post('/coach/availability/add/' + availabilityValuesStr)
                 .done(function availabilityAdded(data, textStatus, jqXHR) {
+                    var $clonedTemplate = $($('#availability-added').html().trim());
+                    $clonedTemplate.find('span.display-text').text(data.display_text);
+                    $clonedTemplate.find('button').data('availabilitySlotId', data.id);
+
+                    var $upcomingAvailability = $('#upcoming-availability'),
+                        $noUnbookedSlots = $upcomingAvailability.find('#no-unbooked-slots :first');
+
+                    if ($noUnbookedSlots && $noUnbookedSlots.length) {
+                        $noUnbookedSlots.remove();
+                    }
+
+                    $upcomingAvailability.append($clonedTemplate);
+
+                    setTimeout(function removeSuccessNotification() { $upcomingAvailability.find('span.success-notification').remove(); }, 2000);
                 })
                 .fail(function availabilityAddFailed(jqXHR, textStatus, errorThrown) {
                     switch (jqXHR.status) {

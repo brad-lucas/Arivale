@@ -25,8 +25,8 @@ class EntityBase(db.Model):
         tablename += '_'
 
       character = character.lower()
-
-    tablename += character
+      
+      tablename += character
         
     return tablename
 

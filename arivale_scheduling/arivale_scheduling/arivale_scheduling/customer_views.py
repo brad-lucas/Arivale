@@ -4,7 +4,7 @@ from flask import Flask, render_template, redirect, url_for, session
 
 from arivale_scheduling import app, current_datetime
 from arivale_scheduling.forms import CustomerSignupForm, CustomerSigninForm
-from arivale_scheduling.models import db, Customer
+from arivale_scheduling.models import Customer
 from arivale_scheduling.views_base import *
 
 #####################################################################################
