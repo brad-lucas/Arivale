@@ -28,20 +28,4 @@ def customer_signout():
 
 @app.route('/customer/profile')
 def customer_profile():
-  if 'customer_email' not in session:
-    return redirect(url_for('customer_signin'))
- 
-  customer = Customer.query.filter_by(email = session['customer_email']).first()
- 
-  if customer is None:
-    return redirect(url_for('customer_signin'))
-
-  slots_for_ux = get_coach_availability_slots_for_ux(customer.appointments)
-  
-  return render_template(
-    'customer_profile.html',
-    title='Customer Profile',
-    year=get_current_year(),
-    current_datetime = current_datetime,
-    user = customer,
-    slots_for_ux = slots_for_ux)
+  return render_profile(Customer, lambda customer: customer.appointments, None)

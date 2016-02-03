@@ -31,26 +31,17 @@ def coach_signout():
 
 @app.route('/coach/profile')
 def coach_profile():
-  if 'coach_email' not in session:
-    return redirect(url_for('coach_signin'))
- 
-  coach = Coach.query.filter_by(email = session['coach_email']).first()
+  return render_profile(
+    Coach,
+    lambda coach: coach.schedule,
+    lambda coach: get_additional_view_data_for_coach(coach))
 
-  if coach is None:
-    return redirect(url_for('coach_signin'))
-
-  slots_for_ux = get_coach_availability_slots_for_ux(coach.schedule)
-        
-  return render_template(
-    'coach_profile.html',
-    title='Coach Profile',
-    year=get_current_year(),
-    current_datetime = current_datetime,
-    user = coach,
-    time_slot_generator = get_timeslot_list_generator(range(8, 18)),
-    slots_for_ux = slots_for_ux,
-    existing_clients = coach.clients,
-    potential_clients = Customer.query.filter_by(coach_id = None).all())
+def get_additional_view_data_for_coach(coach):
+  additional_view_data = { }
+  additional_view_data['time_slots'] = get_timeslot_list(range(8, 18))
+  additional_view_data['existing_clients'] = coach.clients
+  additional_view_data['potential_clients'] = Customer.query.filter_by(coach_id = None).all()
+  return additional_view_data
 
 #####################################################################################
 # API routes
@@ -89,9 +80,9 @@ def coach_add_availability(datetime_str):
 
   status_code = status.HTTP_409_CONFLICT
   
-  availability_slot_overlap_start = get_potential_availability_slot_overlap(availability_datetime_start, slots_by_coach)  
+  availability_slot_overlap_start = get_potential_availability_slot_overlap(availability_datetime_start, slots_by_coach, True)  
   if availability_slot_overlap_start is None:
-    availability_slot_overlap_end = get_potential_availability_slot_overlap(availability_datetime_end, slots_by_coach)
+    availability_slot_overlap_end = get_potential_availability_slot_overlap(availability_datetime_end, slots_by_coach, False)
     if availability_slot_overlap_end is None:
       try:
         slot = CoachAvailabilitySlot(coach_id, availability_datetime_start)
@@ -108,7 +99,7 @@ def coach_add_availability(datetime_str):
 
   return status_code_response(status_code)
 
-def get_potential_availability_slot_overlap(availability_datetime, slots_by_coach):
+def get_potential_availability_slot_overlap(availability_datetime, slots_by_coach, check_exact_match):
   return slots_by_coach.filter(
-    CoachAvailabilitySlot.window_start_utc <= availability_datetime, 
-    (CoachAvailabilitySlot.window_start_utc + appointment_slot_length_in_hours) >= availability_datetime).first()
+    CoachAvailabilitySlot.window_start_utc <= availability_datetime if check_exact_match else CoachAvailabilitySlot.window_start_utc < availability_datetime, 
+    (CoachAvailabilitySlot.window_start_utc + appointment_slot_length_in_hours) > availability_datetime).first()

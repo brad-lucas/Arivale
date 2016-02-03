@@ -1,45 +1,41 @@
 ﻿{% extends "customer_layout.html" %}
-
 {% block content %}
 <h2>Sign up</h2>
-
-  {% for message in form.first_name.errors %}
-<div class="flash">{{ message }}</div>
-  {% endfor %}
-
-  {% for message in form.last_name.errors %}
-<div class="flash">{{ message }}</div>
-  {% endfor %}
-
-  {% for message in form.email.errors %}
-<div class="flash">{{ message }}</div>
-  {% endfor %}
-
-  {% for message in form.password.errors %}
-<div class="flash">{{ message }}</div>
-  {% endfor %}
-
-<form action="{{ url_for('customer_signup') }}" method=post>
-    {{ form.hidden_tag() }}
+<hr />
+<form action="{{ url_for('customer_signup') }}" method=post class="credentials-form">
     <div>
-        {{ form.first_name.label }}
-        {{ form.first_name }}
-    </div>
-    <div>
-        {{ form.last_name.label }}
-        {{ form.last_name }}
-    </div>
-    <div>
-        {{ form.email.label }}
-        {{ form.email }}
-    </div>
-    <div>
-        {{ form.password.label }}
-        {{ form.password }}
-    </div>
-    <div>
-        {{ form.submit }}
+        <div>
+            {{ form.first_name.label }}
+            {{ form.first_name }}
+        </div>
+        {% for message in form.first_name.errors %}
+        <div class="flash">{{ message }}</div>
+        {% endfor %}
+        <div>
+            {{ form.last_name.label }}
+            {{ form.last_name }}
+        </div>
+        {% for message in form.last_name.errors %}
+        <div class="flash">{{ message }}</div>
+        {% endfor %}
+        <div>
+            {{ form.email.label }}
+            {{ form.email }}
+        </div>
+        {% for message in form.email.errors %}
+        <div class="flash">{{ message }}</div>
+        {% endfor %}
+        <div>
+            {{ form.password.label }}
+            {{ form.password }}
+        </div>
+        {% for message in form.password.errors %}
+        <div class="flash">{{ message }}</div>
+        {% endfor %}
+        {{ form.hidden_tag() }}
+        <div style="margin-top: 10px;">
+            {{ form.submit }}
+        </div>
     </div>
 </form>
-
 {% endblock %}

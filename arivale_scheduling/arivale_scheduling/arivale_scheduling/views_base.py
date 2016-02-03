@@ -18,31 +18,42 @@ def status_code_response(status_code):
 def get_current_year():
   return current_datetime.year
 
-def get_timeslot_list_generator(range_of_hours):
+def get_timeslot_list(range_of_hours):
+  timeslot_list = []
+
   for hour in range_of_hours:
     zero_padded_hour = str(hour).zfill(2)
-    yield zero_padded_hour + ':00:00'
-    yield zero_padded_hour + ':30:00'
+    timeslot_list.append(zero_padded_hour + ':00:00')
+    timeslot_list.append(zero_padded_hour + ':30:00')
 
-def get_coach_availability_slots_for_ux(coach_availability_slots):  
+  return timeslot_list
+
+def get_slots_for_ux(coach_availability_slots):  
   past = []
   booked = []
   upcoming = []
+  
+  def set_display_text_for_customer_name(dictionary, slot):
+    dictionary['display_text_for_customer_name'] = slot.customer.first_name + ' ' + slot.customer.last_name
 
   for slot in coach_availability_slots:
-      slot_datetime_start = slot.window_start_utc
+    slot_datetime_start = slot.window_start_utc
       
-      slot_value_dictionary = {}
-      slot_value_dictionary['id'] = slot.slot_id
-      slot_value_dictionary['display_text'] = slot.get_window_display_text()
+    slot_value_dictionary = {}
+    slot_value_dictionary['id'] = slot.slot_id
+    slot_value_dictionary['display_text'] = slot.get_window_display_text()
+
+    was_unbooked_appointment = slot.customer is None
       
-      if slot_datetime_start > current_datetime:
-        if slot.customer_id is None:
-          upcoming.append(slot_value_dictionary)
-        else:
-          booked.append(slot_value_dictionary)
+    if slot_datetime_start > current_datetime:
+      if was_unbooked_appointment:
+        upcoming.append(slot_value_dictionary)
       else:
-        past.append(slot_value_dictionary)
+        set_display_text_for_customer_name(slot_value_dictionary, slot)
+        booked.append(slot_value_dictionary)
+    elif not was_unbooked_appointment: # only show past slots that were booked + completed
+      set_display_text_for_customer_name(slot_value_dictionary, slot)
+      past.append(slot_value_dictionary)
 
   timeslots_for_ux = {}
   timeslots_for_ux['past'] = past
@@ -126,3 +137,31 @@ def render_signout(model_class):
 
   session.pop(model_class_type_lower + '_email', None)
   return redirect(url_for(model_class_type_lower + '_landing'))
+
+def render_profile(model_class, get_slots_from_model, get_additional_view_data):
+  model_class_type = model_class.__name__
+  model_class_type_lower = model_class_type.lower()
+
+  redirect_to_signin = lambda: redirect(url_for(model_class_type_lower + '_signin'))
+
+  if model_class_type_lower + '_email' not in session:
+    return redirect_to_signin()
+ 
+  user = model_class.query.filter_by(email = session[model_class_type_lower + '_email']).first()
+
+  if user is None:
+    return redirect_to_signin()
+
+  slots_from_user = get_slots_from_model(user)
+  slots_for_ux = get_slots_for_ux(slots_from_user)
+
+  view_data = None if get_additional_view_data is None else get_additional_view_data(user)
+      
+  return render_template(
+    model_class_type_lower + '_profile.html',
+    title = model_class_type + ' Profile',
+    year = get_current_year(),
+    current_datetime = current_datetime,
+    user = user,
+    slots_for_ux = slots_for_ux,
+    view_data = view_data)

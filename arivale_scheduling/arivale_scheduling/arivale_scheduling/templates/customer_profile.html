@@ -6,133 +6,75 @@
 <hr />
 <h3>Appointments</h3>
 <div class="availability-container">
-    <h4>Past</h4>
-    <div id="past-availability">
-        {% if slots_for_ux['past']|length == 0 %}
-        <div><span>No past appointments.</span></div>
-        {% else %}
-        {% for slot in slots_for_ux['past'] %}
-        <div>
-            <span class="appointment-display-text">{{ slot['display_text'] }}</span>
-        </div>
-        {% endfor %}
-        {% endif %}
-    </div>
-</div>
-<div class="availability-container">
-    <h4>Booked</h4>
-    <div id="booked-availability">
-        {% if slots_for_ux['booked']|length == 0 %}
-        <div id="no-booked-appointments">
-            <span>No booked appointments.</span>
-        </div>
-        {% else %}
-        {% for slot in slots_for_ux['booked'] %}
-        <div class="booked-appointment">
-            <span class="appointment-display-text">{{ slot['display_text'] }}</span>
-            <button data-availability-slot-id="{{ slot['id'] }}">Cancel</button>
-        </div>
-        {% endfor %}
-        {% endif %}
-    </div>
-</div>
-<div class="availability-container">
-    <h4>Book appointment</h4>
+    <h4>Schedule appointment</h4>
     <div>
         {% if user.coach == None %}
-        <div style="margin-bottom: 5px;">
+        <div style="margin: 10px 5px;">
             <span>You don't have a coach yet.</span>
         </div>
         {% else %}
-        <div style="margin-bottom: 5px;">
-            <span>Your coach, {{ user.coach.first_name }}, is available for the following times. Pick one.</span>
+        <div id="no-coach-availability" style="margin: 10px 5px;" class="{{ '' if user.coach.get_upcoming_availability()|length == 0 else 'hidden' }}">
+            <span>Your coach, {{ user.coach.first_name }}, has no upcoming availability. Please check back again later.</span>
         </div>
-        <div id="book-appointment-control">
-            <select>
-                {% for availability in user.coach.get_upcoming_availability() %}
-                <option value="{{ availability.slot_id }}">{{ availability.get_window_display_text() }}</option>
-                {% endfor %}
-            </select>
-            <button style="margin-left: 15px;">Book</button>
+        <div id="coach-has-availability" class="{{ 'hidden' if user.coach.get_upcoming_availability()|length == 0 else '' }}">
+            <div style="margin: 10px 5px;">
+                <span>Your coach, {{ user.coach.first_name }}, is available for the following times. Please choose one from the list below.</span>
+            </div>
+            <div id="book-appointment-control">
+                <select>
+                    {% for availability in user.coach.get_upcoming_availability() %}
+                    <option value="{{ availability.slot_id }}">{{ availability.get_window_display_text() }}</option>
+                    {% endfor %}
+                </select>
+                <button style="margin-left: 15px;">Book</button>
+            </div>
         </div>
         {% endif %}
+    </div>
+</div>
+<div class="availability-container"><!-- extra spacer --></div>
+<div class="availability-container"><!-- extra spacer --></div>
+<div class="availability-container">
+    <h4 class="expandable">Booked appointments</h4>
+    <div id="booked-availability">
+        <div id="no-booked-appointments" class="{{ '' if slots_for_ux['booked']|length == 0 else 'hidden' }}">
+            <span>No booked appointments.</span>
+        </div>
+        {% for slot in slots_for_ux['booked'] %}
+        <div class="booked-appointment">
+            <div class="appointment-display-text">
+                <span class="display-text">{{ slot['display_text'] }}</span>
+            </div>
+            <button data-id="{{ slot['id'] }}">Cancel</button>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+<div class="availability-container">
+    <h4 class="expandable">Past appointments</h4>
+    <div id="past-availability">
+        <div id="no-past-appointments" class="{{ '' if slots_for_ux['past']|length == 0 else 'hidden' }}">
+            <span>No past appointments.</span>
+        </div>
+        {% for slot in slots_for_ux['past'] %}
+        <div class="past-appointment">
+            <div class="appointment-display-text">
+                <span class="display-text">{{ slot['display_text'] }}</span>
+            </div>
+        </div>
+        {% endfor %}
     </div>
 </div>
 <script type="text/template" id="booking-added">
     <div class="booked-appointment">
-        <span class="display-text"></span>
-        <button data-availability-slot-id="">Cancel</button>
+        <div class="appointment-display-text">
+            <span class="display-text"></span>
+        </div>
+        <button data-id="*#*id*#*">Cancel</button>
         <span class="success-notification"><i>Appointment booked!</i></span>
     </div>
 </script>
 <script type="text/javascript">
-    var $bookAppointmentControl = $('#book-appointment-control');
-    $bookAppointmentControl.find('button').click(function bookAppointment() {
-        var $selected = $bookAppointmentControl.find('select :selected');
-        $.post('/appointments/book/' + $selected.val())
-            .done(function appointmentSuccessfullyBooked(data, textStatus, jqXHR) {
-                var $clonedTemplate = $($('#booking-added').html().trim());
-                $clonedTemplate.find('span.display-text').text(data.display_text);
-                $clonedTemplate.find('button').data('availabilitySlotId', data.id);
-
-                var $bookedAvailability = $('#booked-availability'),
-                    $noBookedAppointments = $bookedAvailability.find('#no-booked-appointments :first');
-
-                if ($noBookedAppointments && $noBookedAppointments.length) {
-                    $noBookedAppointments.remove();
-                }
-
-                $bookedAvailability.append($clonedTemplate);
-
-                $selected.remove()
-
-                setTimeout(function removeSuccessNotification() { $bookedAvailability.find('span.success-notification').remove(); }, 2000);
-            })
-            .fail(function bookAppointmentFailed(jqXHR, textStatus, errorThrown) {
-                switch (jqXHR.status) {
-                    case 404:
-                        break;
-
-                    default:
-                        break;
-                }
-            });
-    });
-
-    $('#booked-availability button').click(function cancelBookedAppointment() {
-        var $this = $(this),
-            $parent = $this.parent(),
-            $newSpan = $('<span />'),
-            somethingHappenedClass = 'something-happened';
-
-        $parent.find('span.' + somethingHappenedClass).remove();
-
-        var appointmentCanceled = function () {
-            $parent.html($newSpan.text('Appointment canceled.').html());
-            setTimeout(function removeText() {
-                if ($('.booked-appointment').length > 1) {
-                    $parent.remove();
-                } else {
-                    $parent.html($newSpan.text('No booked appointments.').html());
-                }
-            }, 2000);
-        };
-
-        $.post('/appointments/cancel/' + $this.data('availabilitySlotId'))
-            .done(function appointmentSuccessfullyCanceled(data, textStatus, jqXHR) {
-                appointmentCanceled();
-            })
-            .fail(function clientAddFailed(jqXHR, textStatus, errorThrown) {
-                switch (jqXHR.status) {
-                    case 404:
-                        appointmentCanceled();
-                        break;
-
-                    default:
-                        $parent.append($newSpan.addClass(somethingHappenedClass).text('Something happened, try again!'));
-                        break;
-                }
-            });
-    });
+    arivale.customer.initialize();
 </script>
-{% endblock %}
+    {% endblock %}

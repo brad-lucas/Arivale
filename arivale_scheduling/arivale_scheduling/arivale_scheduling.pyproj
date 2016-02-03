@@ -52,6 +52,7 @@
     <Folder Include="arivale_scheduling\templates\" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="arivale_scheduling\static\scripts\arivale-scheduling.js" />
     <Content Include="arivale_scheduling\templates\default_landing.html" />
     <Content Include="arivale_scheduling\templates\default_layout.html" />
     <Content Include="arivale_scheduling\templates\empty.html" />

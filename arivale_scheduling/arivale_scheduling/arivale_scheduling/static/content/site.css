@@ -46,53 +46,96 @@ input[type="checkbox"].input-validation-error {
 form label {
     width: 100px;
 }
-form input#firstname,
-form input#lastname,
+
+form input#first_name,
+form input#last_name,
 form input#email,
-form input#password {
-  width: 400px;
-  background-color: #fafafa;
-  -webkit-border-radius: 3px;
-     -moz-border-radius: 3px;
-          border-radius: 3px;
-  border: 1px solid #cccccc;
-  padding: 5px;
-  font-size: 1.1em;
-}
- 
-form input#password {
-  margin-bottom: 10px;
+form input#password,
+select {
+    background-color: #fafafa;
+    -webkit-border-radius: 3px;
+    -moz-border-radius: 3px;
+    border-radius: 3px;
+    border: 1px solid #cccccc;
+    padding: 5px;
+    font-size: 1.1em;
 }
 
-#add-availability-control input::-webkit-inner-spin-button, 
-#add-availability-control input::-webkit-outer-spin-button { 
+form input#first_name,
+form input#last_name,
+form input#email,
+form input#password {
+    width: 400px;
+}
+
+select {
+    width: 265px;
+}
+
+button {
+    width: 60px;
+}
+
+.hidden {
+    display: none;
+}
+
+#add-availability input::-webkit-inner-spin-button,
+#add-availability input::-webkit-outer-spin-button {
     -webkit-appearance: none;
     -moz-appearance: none;
     appearance: none;
-    margin: 0; 
+    margin: 0;
 }
 
-.availability-container { margin: 20px 0; }
+#add-availability #error-message {
+    padding: 10px;
+}
+
+.credentials-form > div, .availability-container,
+.credentials-form > div, .availability-container h4,
+.credentials-form > div > div {
+    padding: 5px 0;
+}
 
 div[id$="-availability"] div[class$="-appointment"],
 div[id$="-clients"] div[class$="-client"] {
     height: 30px;
     margin: 5px 0;
 }
-div[id$="-availability"] div[class$="-appointment"]:first-of-type,
-div[id$="-clients"] div[class$="-client"]:first-of-type {
-    margin-top: 0;
-}
-div[id$="-availability"] div[class$="-appointment"]:last-of-type,
-div[id$="-clients"] div[class$="-client"]:last-of-type {
-    margin-bottom: 0;
-}
 
-div[id$="-availability"] div[class$="-appointment"] .appointment-display-text,
-div[id$="-clients"] div[class$="-client"] .client-display-text {
-    display:inline-block;
-    width: 35%;
-}
+    .credentials-form > div:first-of-type,
+    .credentials-form > div > div:first-of-type,
+    div[id$="-availability"] div[class$="-appointment"]:first-of-type,
+    div[id$="-clients"] div[class$="-client"]:first-of-type {
+        margin-top: 0;
+        padding-top: 0;
+    }
 
-div[id$="-availability"] div[class$="-appointment"] button {
+    .credentials-form > div:last-of-type, .credentials-form > div > div:last-of-type,
+    div[id$="-availability"] div[class$="-appointment"]:last-of-type,
+    div[id$="-clients"] div[class$="-client"]:last-of-type {
+        margin-bottom: 0;
+        padding-bottom: 0;
+    }
+
+    div[id^="no-"][id$="-appointments"],
+    div[id^="no-"][id$="-clients"],
+    div[id$="-availability"] div[class$="-appointment"] .appointment-display-text,
+    div[id$="-clients"] div[class$="-client"] .client-display-text {
+        display: inline-block;
+        width: 280px;
+        /*width: 400px;*/
+        -webkit-border-radius: 3px;
+        -moz-border-radius: 3px;
+        border-radius: 3px;
+        padding: 5px;
+        font-size: 1.1em;
+    }
+
+    div[id$="-availability"] div[class$="-appointment"] button {
+    }
+
+.flash {
+    color: red;
 }

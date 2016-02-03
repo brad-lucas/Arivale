@@ -96,7 +96,7 @@ class CoachAvailabilitySlot(EntityBase):
     return self.__format_date__(self.window_start_utc) + ': ' + self.__format_time__(self.window_start_utc) + ' - ' + self.__format_time__(self.get_window_end())
 
   def __format_date__(self, datetime):
-    return datetime.strftime("%Y-%m-%d")
+    return datetime.strftime("%m/%d/%Y")
 
   def __format_time__(self, datetime):
     return datetime.strftime("%I:%M%p")
